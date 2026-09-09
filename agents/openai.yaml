@@ -1,0 +1,4 @@
+interface:
+  display_name: "graph_ma"
+  short_description: "基于真实源码生成主图与核心子模块 SVG 项目解读文档"
+  default_prompt: "Use $graph-ma to verify this codebase from source, define the main map first, then generate SVG submodule diagrams and a concise Markdown explanation."
