@@ -17,6 +17,8 @@
 
 事实来源区分源码确认、本地文件实测、历史输出、本次运行、合理推断和待验证。SVG 进行 XML 与渲染检查，结果图检查可读性与来源，Markdown 检查图片链接。默认仅修改指定文档与图形资产，增量编辑保留用户补充，不修改业务代码。
 
+多模块或持续维护时，可在文档目录保存轻量 `analysis.json`，把模块、结论、源码位置、章节和图形关联起来。文件摘要检测已提交与未提交的内容变化，按记录的依赖定位待更新章节；Notebook 分别记录代码与历史输出变化。项目已有 Understand Anything 图谱时可复用其导航信息，关键结论仍回到当前源码核实。
+
 ## 使用示例
 
 ```text
@@ -46,6 +48,18 @@ graph-ma/
   references/
     service-agent.md
     machine-learning.md
+    analysis-record.md
+    understand-anything.md
+  scripts/
+    analysis.py
+    validate.py
+    extract_notebook_outputs.py
+  tests/
+    test_tools.py
+    fixtures/
+      service/
+      agent/
+      notebook/
   agents/
     openai.yaml
   README.md
@@ -53,4 +67,23 @@ graph-ma/
 
 [SKILL.md](SKILL.md) 是技能入口；仅按项目类型读取对应参考文件。[服务与 Agent 检查](references/service-agent.md)覆盖记忆、RAG、路由、工具和回写；[机器学习检查](references/machine-learning.md)覆盖数据、预处理、评估、融合和 Notebook 证据。agents/openai.yaml 提供显示名称、简介和默认提示词。
 
-本仓库不包含独立可执行程序或预生成的项目分析结果。实际分析需要宿主 Agent 能读取目标代码库、写入输出文件，并使用浏览器或其他可靠渲染器完成 SVG 视觉检查。
+实际项目解读由宿主 Agent 完成；三个辅助脚本使用 Python 3.10+ 标准库，无第三方依赖，不执行项目业务代码。详细底稿格式、影响范围和更新顺序见 [分析底稿与增量更新](references/analysis-record.md)，可选图谱接入见 [Understand Anything](references/understand-anything.md)。
+
+## 辅助工具
+
+以下命令在被分析项目中执行，`<skill>` 替换为本技能目录。先生成并核实文档与底稿，再记录摘要基线：
+
+```text
+python <skill>/scripts/validate.py --document docs/review.md --analysis docs/analysis.json --project . --flowchart docs/assets/main.svg
+python <skill>/scripts/analysis.py snapshot --analysis docs/analysis.json --project .
+python <skill>/scripts/analysis.py changes --analysis docs/analysis.json --project .
+python <skill>/scripts/extract_notebook_outputs.py experiment.ipynb --cells 4,9 --output docs/assets/results
+```
+
+校验器也支持只检查文档图片或单独检查底稿。影响报告只覆盖声明的源码范围和依赖；机械校验不证明结论正确，SVG 与结果图仍需可靠渲染并目检。提取的 Notebook 图片标记为历史输出，同名资产拒绝覆盖。
+
+回归测试覆盖服务、Agent 和 Notebook 样例，以及断链、源码删除、依赖影响、输出来源和用户内容保护：
+
+```text
+python -m unittest discover -s tests -v
+```
