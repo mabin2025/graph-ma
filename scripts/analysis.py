@@ -57,7 +57,7 @@ def check_shape(data):
         ids.add(entry['id'])
     module_ids = {m['id'] for m in modules}
     for m in modules:
-        for key in ('sources', 'depends_on', 'sections', 'assets'):
+        for key in ('sources', 'depends_on', 'sections', 'assets', 'graph_node_ids'):
             if not isinstance(m.get(key, []), list) or not all(isinstance(x, str) and x for x in m.get(key, [])):
                 raise ValueError(f'{m["id"]}.{key} must be an array of strings')
         if set(m.get('depends_on', [])) - module_ids:

@@ -38,6 +38,7 @@
 - `scope.paths`：相对项目根目录的文件或目录；应包含入口、相关共享代码及配置。排除生成的文档与底稿，避免把自身写入当成源码变化。目录跟踪会发现新文件；只列文件就不能发现旁边新加入的路由。`exclude` 使用区分大小写的 Python `fnmatch` 规则，不支持 gitignore 的反选语法；默认跳过 `.git`、`node_modules`、`.venv`、`__pycache__` 和 UA 图谱目录。
 - 所有源码路径用 `/`；`sources` 与 `evidence.path` 相对项目根目录。`assets` 相对底稿目录，置于其子目录。不要存绝对机器路径、密钥或环境变量值。
 - `modules[].id` 与 `claims[].id` 全局唯一，更新时尽量保持稳定。`depends_on` 表示“本模块依赖哪些模块”，影响从被依赖模块传播到调用方；循环依赖允许存在。
+- 内置 UA 分析同时保存 `knowledge-graph.json` 时，模块可加 `graph_node_ids: ["module:request", "file:src/app.py"]` 关联真实图谱节点。图谱负责导航，底稿负责结论与证据；`ua_graph.py check --graph <graph> --project <project> --analysis <analysis>` 会检查关联及摘要时效，不从底稿依赖自动推断源码 `calls` 关系。
 - `sections` 保存实际文档章节标题；`assets` 保存有关的图形路径。正文与 SVG 可沿用这些模块 ID，方便定位；无需把整段源码复制进 JSON。
 - `kind` 为 `source`（源码）、`local`（本地文件实测）、`historical`（历史输出）、`run`（本次运行）、`inference`（合理推断）或 `unverified`（待验证）。前四种必须附证据；本次运行还需指向本次保留的日志或结果，不能仅引用实现代码。
 - `evidence.lines` 是包含首尾的 1-based 行范围；Notebook 用 `cell` 表示按文件顺序的 1-based 位置，可同时记录 `cell_id`。Notebook 的 `lines` 指该单元格源码行，非整个 JSON 文件行。保存的图可只指向 Notebook 单元格或结果文件；解释其含义仍需人工核实。

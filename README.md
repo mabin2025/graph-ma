@@ -1,6 +1,6 @@
 # graph-ma
 
-基于真实源码，用简洁流程图、核心代码和真实结果图，生成便于阅读与复盘的中文项目解读。
+内置 Understand Anything（UA）式图谱分析，基于真实源码，用简洁流程图、核心代码和真实结果图，生成便于阅读与复盘的中文项目解读。只需调用 graph-ma，即可完成图谱梳理与图文解读。
 
 ## 适用场景
 
@@ -17,12 +17,15 @@
 
 事实来源区分源码确认、本地文件实测、历史输出、本次运行、合理推断和待验证。SVG 进行 XML 与渲染检查，结果图检查可读性与来源，Markdown 检查图片链接。默认仅修改指定文档与图形资产，增量编辑保留用户补充，不修改业务代码。
 
-多模块或持续维护时，可在文档目录保存轻量 `analysis.json`，把模块、结论、源码位置、章节和图形关联起来。文件摘要检测已提交与未提交的内容变化，按记录的依赖定位待更新章节；Notebook 分别记录代码与历史输出变化。项目已有 Understand Anything 图谱时可复用其导航信息，关键结论仍回到当前源码核实。
+多模块、完整解读或持续维护时，默认在文档目录保存 UA 格式的 `knowledge-graph.json` 和轻量 `analysis.json`。图谱记录文件、关键符号、真实关系、架构分层与阅读路线；底稿把结论、源码位置、章节和图形关联起来，文件摘要检测已提交与未提交的变化，按依赖定位待更新章节。Notebook 分别记录代码与历史输出变化。小范围问题可只在上下文中追踪，不额外落盘。
+
+内置流程是“勘察 → 节点与关系 → 架构分层 → 阅读路线 → 源码核实 → 主图与正文”。没有旧图谱也能直接分析，不必先调用 understand；已有图谱则检查时效、筛选相关子图并补充源码。已安装且可用时，复用 UA 原生扫描和结构解析工具；否则由当前 Agent 完成分析。完整 Dashboard、语义搜索和提交 hooks 未捆绑，交互探索按需使用现有 UA 安装。新增局部图谱保存在文档目录，不覆盖项目原有全量图谱。
 
 ## 使用示例
 
 ```text
 使用 graph-ma 分析当前代码库，生成中文项目解读到指定文档目录。
+使用内置 UA 工作流梳理关系、分层和阅读路线，保存当前范围的图谱与分析底稿。
 主图与子图保持简洁，关键模块附少量核心代码。
 有真实结果图时解释它支持的结论，关键事实注明源码位置。
 ```
@@ -54,8 +57,10 @@ graph-ma/
     analysis.py
     validate.py
     extract_notebook_outputs.py
+    ua_graph.py
   tests/
     test_tools.py
+    test_ua_graph.py
     fixtures/
       service/
       agent/
@@ -67,7 +72,7 @@ graph-ma/
 
 [SKILL.md](SKILL.md) 是技能入口；仅按项目类型读取对应参考文件。[服务与 Agent 检查](references/service-agent.md)覆盖记忆、RAG、路由、工具和回写；[机器学习检查](references/machine-learning.md)覆盖数据、预处理、评估、融合和 Notebook 证据。agents/openai.yaml 提供显示名称、简介和默认提示词。
 
-实际项目解读由宿主 Agent 完成；三个辅助脚本使用 Python 3.10+ 标准库，无第三方依赖，不执行项目业务代码。详细底稿格式、影响范围和更新顺序见 [分析底稿与增量更新](references/analysis-record.md)，可选图谱接入见 [Understand Anything](references/understand-anything.md)。
+实际项目解读由宿主 Agent 完成；四个辅助脚本使用 Python 3.10+ 标准库，无第三方依赖，不执行项目业务代码。图谱时效检查可使用本地 Git。详细底稿格式、影响范围和更新顺序见 [分析底稿与增量更新](references/analysis-record.md)，内置流程、原生工具复用及图谱格式见 [Understand Anything 分析](references/understand-anything.md)。
 
 ## 辅助工具
 
@@ -78,9 +83,13 @@ python <skill>/scripts/validate.py --document docs/review.md --analysis docs/ana
 python <skill>/scripts/analysis.py snapshot --analysis docs/analysis.json --project .
 python <skill>/scripts/analysis.py changes --analysis docs/analysis.json --project .
 python <skill>/scripts/extract_notebook_outputs.py experiment.ipynb --cells 4,9 --output docs/assets/results
+python <skill>/scripts/ua_graph.py check --graph docs/knowledge-graph.json --project . --analysis docs/analysis.json
+python <skill>/scripts/ua_graph.py query --graph docs/knowledge-graph.json --project . --query 路由 工具 --hops 1 --limit 20
 ```
 
 校验器也支持只检查文档图片或单独检查底稿。影响报告只覆盖声明的源码范围和依赖；机械校验不证明结论正确，SVG 与结果图仍需可靠渲染并目检。提取的 Notebook 图片标记为历史输出，同名资产拒绝覆盖。
+
+`ua_graph.py` 只读图谱：检查基本结构、节点引用和源码位置，按关键词提取有限子图，并报告项目范围的 Git 变化及可选底稿摘要变化。它不会自动生成图谱、做语义搜索或运行完整 UA 上游流水线；图谱由 Agent 按内置工作流建立。图谱检查以结构错误决定退出码，源码变化另看 `freshness` 和 `analysis_changes`，不能把退出 0 当成图谱最新。
 
 回归测试覆盖服务、Agent 和 Notebook 样例，以及断链、源码删除、依赖影响、输出来源和用户内容保护：
 

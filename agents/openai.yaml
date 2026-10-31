@@ -1,4 +1,4 @@
 interface:
   display_name: "graph_ma"
-  short_description: "基于真实源码，用简洁图、核心代码与结果图生成中文项目解读"
-  default_prompt: "Use $graph-ma to explain this codebase with a concise main diagram, selected core code and source-grounded result figures; add project-specific questions when relevant to review or interview preparation."
+  short_description: "内置 UA 图谱梳理，结合简洁流程图、核心代码与真实结果生成中文项目解读"
+  default_prompt: "Use $graph-ma to map this codebase with its built-in Understand Anything workflow, verify relationships against source, and produce a Chinese explanation with concise SVG diagrams, selected core code and real result figures."
