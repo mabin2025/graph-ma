@@ -2,6 +2,43 @@
 
 内置 Understand Anything（UA）式图谱分析，基于真实源码，用简洁流程图、核心代码和真实结果图，生成便于阅读与复盘的中文项目解读。只需调用 graph-ma，即可完成图谱梳理与图文解读。
 
+## 安装与依赖
+
+### 安装 graph-ma
+
+将本仓库完整放入宿主支持的技能目录。例如，Codex 的个人技能目录可使用 `~/.codex/skills/graph-ma/`。保留 `SKILL.md`、`references/`、`scripts/` 和 `agents/` 的相对结构，不要只复制 `SKILL.md`。加载技能后，可在支持的宿主中使用 `$graph-ma` 或用自然语言指定 graph-ma。
+
+### 是否需要安装 Understand Anything？
+
+**UA 是可选依赖。graph-ma 内置其核心分析方法，不包含完整 UA 插件。**
+
+| 使用方式 | 是否需要安装 UA | 其他依赖 |
+| --- | --- | --- |
+| 由 Agent 梳理源码、建立图谱并生成中文图文解读 | 否 | 支持技能、源码阅读及文件写入的 Agent |
+| 读取已有 UA 图谱、运行 graph-ma 的检索与校验脚本 | 否 | 辅助脚本需要 Python 3.10+；Git 时效检查需要 Git |
+| 复用 UA 原生扫描、导入映射与符号提取工具 | 是 | 完整 UA 安装及其运行时，按官方说明完成构建 |
+| 使用 UA 交互式 Dashboard 和完整上游功能 | 是 | 按 UA 官方说明安装和启动 |
+
+未安装 UA 或原生工具不可用时，graph-ma 继续由当前 Agent 分析源码；不会自动安装 UA。只复制 `understand/SKILL.md` 不足以运行 UA 原生解析工具，还需要完整插件及已构建的 core。
+
+### 可选：安装 UA
+
+按照 [UA 官方多平台安装说明](https://github.com/Egonex-AI/Understand-Anything#-multi-platform-installation) 选择对应宿主。官方提供的安装入口如下，安装过程中选择你的平台（例如 `codex`）：
+
+Windows PowerShell：
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/install.ps1 | iex
+```
+
+macOS / Linux（Codex）：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/install.sh | bash -s codex
+```
+
+安装完成后按官方说明重启宿主，并确认插件及运行时可用，再使用 `$graph-ma`。使用 graph-ma 的集成流程不要求事先执行 `$understand`；需要单独使用完整 UA 分析或 Dashboard 时，再按 UA 的工作流操作。运行时版本与构建要求以官方说明为准。
+
 ## 适用场景
 
 - 项目接手、架构梳理、调用链和数据流分析。
