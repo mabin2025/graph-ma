@@ -6,11 +6,37 @@
 
 ### 安装 graph-ma
 
-将本仓库完整放入宿主支持的技能目录。例如，Codex 的个人技能目录可使用 `~/.codex/skills/graph-ma/`。保留 `SKILL.md`、`references/`、`scripts/` 和 `agents/` 的相对结构，不要只复制 `SKILL.md`。加载技能后，可在支持的宿主中使用 `$graph-ma` 或用自然语言指定 graph-ma。
+**推荐使用仓库安装脚本：默认同时安装 graph-ma 和 Understand Anything。** 安装前准备 Python 3.10+、Git、Node.js 22+ 和 pnpm 10+；脚本不会替你安装 Python、Node 或包管理器。
+
+Windows PowerShell：
+
+```powershell
+git clone https://github.com/mabin2025/graph-ma.git
+cd graph-ma
+.\install.ps1
+```
+
+macOS / Linux：
+
+```bash
+git clone https://github.com/mabin2025/graph-ma.git
+cd graph-ma
+bash ./install.sh
+```
+
+安装器会自动下载官方 UA 仓库，在需要时安装其依赖并构建 core，验证解析运行时，然后安装 graph-ma、UA 技能入口及插件定位链接。已有完整、可运行的 UA 环境会复用，不自动拉取或重置其代码；Dashboard 不会自动启动。
+
+默认技能目录为 `$CODEX_HOME/skills`（未设置时为 `~/.codex/skills`），UA 仓库默认位于 `~/.understand-anything/repo`，插件定位链接为 `~/.understand-anything-plugin`。运行后重启宿主，再调用 `$graph-ma`。
+
+已有目标技能与当前版本内容不同时，安装器会停止并提示；显式传入 `-Replace`（PowerShell）或 `--replace`（Bash/Python）后，先把旧目录移入对应目标目录的 `.graph-ma-backups/`，再安装。不会删除这些备份，也不会覆盖已有 UA checkout。
+
+只安装 graph-ma、跳过 UA 时使用 `.\install.ps1 -SkipUA` 或 `bash ./install.sh --skip-ua`；此时安装器只需要 Python 3.10+。自定义位置可使用 PowerShell 的 `-SkillsDir` / `-UADir`，或 Bash/Python 的 `--skills-dir` / `--ua-dir`；其他宿主需选择其支持的技能目录。
+
+也可手动把仓库完整放入技能目录，保留 `SKILL.md`、`references/`、`scripts/` 和 `agents/` 的相对结构。**手动复制文件或通过其他工具安装技能，不会自动执行本仓库安装器，也不会自动安装 UA。**
 
 ### 是否需要安装 Understand Anything？
 
-**UA 是可选依赖。graph-ma 内置其核心分析方法，不包含完整 UA 插件。**
+**UA 是运行时可选依赖；推荐安装器默认一并安装。** graph-ma 内置其核心分析方法，不捆绑上游完整源码。
 
 | 使用方式 | 是否需要安装 UA | 其他依赖 |
 | --- | --- | --- |
@@ -19,9 +45,9 @@
 | 复用 UA 原生扫描、导入映射与符号提取工具 | 是 | 完整 UA 安装及其运行时，按官方说明完成构建 |
 | 使用 UA 交互式 Dashboard 和完整上游功能 | 是 | 按 UA 官方说明安装和启动 |
 
-未安装 UA 或原生工具不可用时，graph-ma 继续由当前 Agent 分析源码；不会自动安装 UA。只复制 `understand/SKILL.md` 不足以运行 UA 原生解析工具，还需要完整插件及已构建的 core。
+选择跳过 UA 或原生工具不可用时，graph-ma 继续由当前 Agent 分析源码；日常使用技能时不会另行联网安装。只复制 `understand/SKILL.md` 不足以运行 UA 原生解析工具，还需要完整插件及已构建的 core。
 
-### 可选：安装 UA
+### 手动安装 UA（可选）
 
 按照 [UA 官方多平台安装说明](https://github.com/Egonex-AI/Understand-Anything#-multi-platform-installation) 选择对应宿主。官方提供的安装入口如下，安装过程中选择你的平台（例如 `codex`）：
 
@@ -84,6 +110,8 @@ curl -fsSL https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/
 
 ```text
 graph-ma/
+  install.ps1
+  install.sh
   SKILL.md
   references/
     service-agent.md
@@ -95,9 +123,11 @@ graph-ma/
     validate.py
     extract_notebook_outputs.py
     ua_graph.py
+    install.py
   tests/
     test_tools.py
     test_ua_graph.py
+    test_install.py
     fixtures/
       service/
       agent/
@@ -109,7 +139,7 @@ graph-ma/
 
 [SKILL.md](SKILL.md) 是技能入口；仅按项目类型读取对应参考文件。[服务与 Agent 检查](references/service-agent.md)覆盖记忆、RAG、路由、工具和回写；[机器学习检查](references/machine-learning.md)覆盖数据、预处理、评估、融合和 Notebook 证据。agents/openai.yaml 提供显示名称、简介和默认提示词。
 
-实际项目解读由宿主 Agent 完成；四个辅助脚本使用 Python 3.10+ 标准库，无第三方依赖，不执行项目业务代码。图谱时效检查可使用本地 Git。详细底稿格式、影响范围和更新顺序见 [分析底稿与增量更新](references/analysis-record.md)，内置流程、原生工具复用及图谱格式见 [Understand Anything 分析](references/understand-anything.md)。
+实际项目解读由宿主 Agent 完成；四个分析辅助脚本使用 Python 3.10+ 标准库，无第三方 Python 依赖，不执行项目业务代码。图谱时效检查可使用本地 Git。另有 `scripts/install.py` 供安装入口调用：默认会联网下载 UA 并在必要时运行其依赖安装与构建。详细底稿格式、影响范围和更新顺序见 [分析底稿与增量更新](references/analysis-record.md)，内置流程、原生工具复用及图谱格式见 [Understand Anything 分析](references/understand-anything.md)。
 
 ## 辅助工具
 
